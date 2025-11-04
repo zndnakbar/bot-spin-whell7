@@ -1,0 +1,11 @@
+:root{ --blue:#0B61A4; --orange:#FF6A00; }
+body{ font-family:system-ui,Segoe UI,Roboto,Arial; margin:0; background:#f7f9fc; color:#0f172a; }
+header{ display:flex; align-items:center; justify-content:space-between; padding:16px 20px; background:white; border-bottom:1px solid #e5e7eb; position:sticky; top:0; }
+h1{ font-size:18px; margin:0; }
+main{ display:grid; grid-template-columns:1fr 1fr; gap:16px; padding:16px; }
+.panel{ background:white; border:1px solid #e5e7eb; border-radius:12px; padding:16px; box-shadow:0 1px 3px rgba(0,0,0,.03); }
+input,select,textarea,button{ padding:8px 10px; border:1px solid #e5e7eb; border-radius:8px; }
+button{ background:var(--blue); color:white; border:none; cursor:pointer; }
+button:hover{ filter:brightness(.95); }
+#sliceTable{ width:100%; border-collapse:collapse; font-size:14px; }
+#sliceTable th,#sliceTable td{ padding:8px; border-bottom:1px solid #e5e7eb; }

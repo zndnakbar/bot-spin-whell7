@@ -1,0 +1,9 @@
+:root{ --blue:#0B61A4; --orange:#FF6A00; }
+body{ display:grid; place-items:center; min-height:100vh; background:#f1f5f9; font-family:system-ui,Segoe UI,Roboto,Arial; }
+.wrap{ background:white; padding:20px; border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,.06); text-align:center; }
+h1{ margin:6px 0 16px; color:#0f172a; font-size:20px; }
+canvas{ transition: transform 0.2s linear; }
+button{ margin-top:12px; background:var(--orange); color:white; border:none; padding:10px 14px; border-radius:10px; font-weight:600; cursor:pointer; }
+button:disabled{ filter:grayscale(1); opacity:.7; cursor:not-allowed; }
+.card{ margin-top:12px; padding:12px; border-radius:12px; background:rgba(11,97,164,.06); }
+.hidden{ display:none; }

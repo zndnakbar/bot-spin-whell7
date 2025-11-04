@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Spin & Win – BusOnlineTicket</title>
+  <link rel="stylesheet" href="spin.css"/>
+</head>
+<body>
+  <main class="wrap">
+    <h1>Spin & Win</h1>
+    <canvas id="wheel" width="360" height="360"></canvas>
+    <button id="spinBtn">Putar Sekarang</button>
+    <p id="status"></p>
+    <div id="result" class="card hidden"></div>
+  </main>
+
+<script>
+const API = location.origin.replace(/\/$/, '')
+const wheelId = 'wheel_daily';
+const canvas = document.getElementById('wheel');
+const ctx = canvas.getContext('2d');
+let slices = [];
+let lastOutcome = null;
+
+function deg2rad(d){ return d*Math.PI/180 }
+
+function drawWheel(){
+  const cx = canvas.width/2, cy = canvas.height/2, r = Math.min(cx,cy)-4;
+  const n = slices.length || 8;
+  const step = 360/n;
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  for(let i=0;i<n;i++){
+    const s = slices[i];
+    const a0 = deg2rad(i*step-90), a1 = deg2rad((i+1)*step-90);
+    ctx.beginPath(); ctx.moveTo(cx,cy); ctx.arc(cx,cy,r,a0,a1); ctx.closePath();
+    ctx.fillStyle = (s?.style?.bg)|| (i%2? '#0B61A4':'#FF6A00');
+    ctx.fill();
+    ctx.save();
+    ctx.translate(cx,cy);
+    ctx.rotate(deg2rad(i*step + step/2 - 90));
+    ctx.fillStyle = (s?.style?.fg)||'#fff';
+    ctx.font = 'bold 14px system-ui';
+    ctx.textAlign='center';
+    ctx.fillText(s?.label||('Item '+(i+1)), r*0.6, 6);
+    ctx.restore();
+  }
+  // pointer
+  ctx.beginPath(); ctx.moveTo(cx,cy-r+4); ctx.lineTo(cx-8, cy-r+20); ctx.lineTo(cx+8, cy-r+20); ctx.closePath();
+  ctx.fillStyle='#0F172A'; ctx.fill();
+}
+
+async function loadConfig(){
+  const r = await fetch(`${API}/api/wheels/${wheelId}/config`, { credentials:'include' });
+  const data = await r.json();
+  slices = data.slices;
+  drawWheel();
+}
+
+function animateToSlice(index){
+  return new Promise(resolve=>{
+    const totalRot = 360*5 + (index * (360/slices.length));
+    const start = performance.now();
+    const dur = 2200 + Math.random()*400;
+    function frame(t){
+      const p = Math.min(1,(t-start)/dur);
+      const ease = 1 - Math.pow(1-p,3);
+      const angle = totalRot*ease;
+      canvas.style.transform = `rotate(${angle}deg)`;
+      if(p<1) requestAnimationFrame(frame); else resolve();
+    }
+    requestAnimationFrame(frame);
+  });
+}
+
+async function spin(){
+  document.getElementById('status').textContent='Memutar…';
+  document.getElementById('spinBtn').disabled = true;
+  try{
+    const r = await fetch(`${API}/api/wheels/${wheelId}/spin`, {method:'POST', credentials:'include'});
+    const data = await r.json();
+    if(!r.ok){
+      if(data.error==='too_soon'){
+        document.getElementById('status').textContent = 'Kamu bisa spin lagi pada: '+new Date(data.nextEligibleAt).toLocaleString();
+      } else {
+        document.getElementById('status').textContent = 'Terjadi kesalahan. Coba lagi.';
+      }
+      document.getElementById('spinBtn').disabled = false; return;
+    }
+    lastOutcome = data.outcome;
+    const idx = slices.findIndex(s=>s.id===data.outcome.id);
+    await animateToSlice(idx<0?0:idx);
+    document.getElementById('status').textContent = '';
+    const card = document.getElementById('result');
+    card.classList.remove('hidden');
+    card.innerHTML = `<h3>Hasil: ${data.outcome.label}</h3>` +
+      (data.outcome.code? `<p>Kode Voucher: <b>${data.outcome.code}</b> <button onclick=\"navigator.clipboard.writeText('${data.outcome.code}')\">Salin</button></p>`: '') +
+      `<small>Spin berikutnya: ${new Date(data.nextEligibleAt).toLocaleString()}</small>`;
+  }catch(e){
+    document.getElementById('status').textContent='Jaringan error';
+  }finally{
+    document.getElementById('spinBtn').disabled = false;
+  }
+}
+
+loadConfig();
+document.getElementById('spinBtn').onclick = spin;
+</script>
+</body>
+</html>
