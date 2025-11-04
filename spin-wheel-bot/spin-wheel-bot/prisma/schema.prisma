@@ -1,0 +1,62 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+ datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model rewards {
+  id        String   @id
+  name      String
+  baseWeight Int
+  totalQty  Int?
+  type      String
+  isActive  Boolean  @default(true)
+  metadata  Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  counters  reward_counters[]
+  dailyCaps daily_caps[]
+  spins     spins[]
+}
+
+model reward_counters {
+  id         String   @id @default(uuid())
+  reward     rewards  @relation(fields: [rewardId], references: [id])
+  rewardId   String
+  date       DateTime
+  usedCount  Int      @default(0)
+
+  @@unique([rewardId, date], name: "rewardId_date")
+}
+
+model daily_caps {
+  id       String  @id @default(uuid())
+  reward   rewards @relation(fields: [rewardId], references: [id])
+  rewardId String
+  date     DateTime
+  cap      Int
+
+  @@unique([rewardId, date], name: "dailyReward_date")
+}
+
+model spins {
+  id              String   @id @default(uuid())
+  userId          String
+  reward          rewards? @relation(fields: [rewardId], references: [id])
+  rewardId        String?
+  createdAt       DateTime @default(now())
+  idempotencyKey  String   @unique
+  requestSignature String
+  clientInfo      Json?
+  outcomeSnapshot Json
+}
+
+model users {
+  id        String   @id
+  email     String   @unique
+  createdAt DateTime @default(now())
+  spins     spins[]
+}

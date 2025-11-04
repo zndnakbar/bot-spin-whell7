@@ -1,0 +1,18 @@
+{
+  "name": "festive-fare-spin-monorepo",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "concurrently \"pnpm --filter app dev\" \"pnpm --filter server dev\"",
+    "build": "pnpm --filter app build && pnpm --filter server build",
+    "lint": "pnpm -r lint",
+    "test": "pnpm -r test"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "prisma": "5.9.1"
+  },
+  "prisma": {
+    "seed": "pnpm --filter server exec ts-node prisma/seed.ts"
+  }
+}
