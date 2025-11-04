@@ -1,0 +1,10 @@
+/node_modules
+pnpm-lock.yaml
+app/.next
+app/node_modules
+server/node_modules
+server/dist
+.env
+.env.*
+coverage
+.prisma

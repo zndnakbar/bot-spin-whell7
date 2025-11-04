@@ -1,0 +1,15 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-[#fdf8f2] text-festiveDark font-sans;
+}
+
+a {
+  @apply text-festiveRed hover:text-festiveGold;
+}
+
+button:disabled {
+  @apply opacity-60 cursor-not-allowed;
+}
